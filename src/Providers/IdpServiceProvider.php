@@ -13,7 +13,7 @@ class IdpServiceProvider extends ServiceProvider
 	 */
 	public function register()
 	{
-		//
+		$this->mergeConfigFrom(__DIR__ . '/../config/idp.php', 'idp');
 	}
 
 	/**
