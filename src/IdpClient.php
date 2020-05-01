@@ -2,10 +2,6 @@
 
 namespace Helium\IdpClient;
 
-use Helium\FriendlyApi\Contracts\FriendlyApiEngineContract;
-use Helium\FriendlyApi\Exceptions\FriendlyApiException;
-use Helium\FriendlyApi\FriendlyApi;
-use Helium\FriendlyApi\Models\FriendlyApiResponse;
 use Helium\IdpClient\Exceptions\Base\IdpException;
 use Helium\IdpClient\Exceptions\IdpInvalidArgumentException;
 use Helium\IdpClient\Exceptions\IdpMissingConfigurationException;
@@ -15,6 +11,10 @@ use Helium\IdpClient\Models\IdpOrganization;
 use Helium\IdpClient\Models\IdpPaginatedList;
 use Helium\IdpClient\Models\IdpServerToken;
 use Helium\IdpClient\Models\IdpUser;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Http;
 
 /**
  * A note on Server Tokens:
@@ -73,40 +73,35 @@ class IdpClient
 		return $secret;
 	}
 
-	/**
-	 * @description Get a FriendlyApi instance for making requests
-	 * @return FriendlyApi
-	 */
-	protected static function getFriendlyApi(): FriendlyApiEngineContract
+	protected static function getHttp(): PendingRequest
 	{
-		return FriendlyApi::create()
-			->setBaseUrl(self::getBaseUrl());
+		return Http::withOptions([
+			'base_uri' => self::getBaseUrl()
+		]);
 	}
 
 	/**
-	 * @description Process FriendlyApiResponse object into an array of data
+	 * @description Process response object into an array of data
 	 * Check response code, and throw an IdpException if not success
-	 * @param FriendlyApiResponse $response
+	 * @param Response $response
 	 * @return array
 	 * @throws IdpException
 	 */
-	protected static function processResponse(FriendlyApiResponse $response): array
+	protected static function processResponse(Response $response): array
 	{
-		if (!$response->isSuccessfulStatusCode())
+		if (!$response->successful())
 		{
-			$messages = $response->getJson()['message'] ?? '';
+			$messages = $response->json()['message'] ?? '';
 
 			if (is_string($messages))
 			{
 				$messages = [$messages];
 			}
 
-			$code = $response->getCode();
-
-			throw new IdpResponseException($code, $messages);
+			throw new IdpResponseException($response->status(), $messages);
 		}
 
-		return $response->getJson();
+		return $response->json();
 	}
 	//endregion
 
@@ -120,29 +115,23 @@ class IdpClient
 
 		try
 		{
-			$response = self::getFriendlyApi()
-				->setMethod(FriendlyApi::POST)
-				->setPath('v1/oauth/token')
-				->setJsonQuery([
+			$response = self::getHttp()
+				->asJson()
+				->post('v1/oauth/token', [
 					'grant_type' => 'client_credentials',
 					'client_id' => self::getClientId(),
 					'client_secret' => self::getClientSecret(),
 					'scope' => '*'
-				])
-				->send();
+				]);
 		}
-		catch (FriendlyApiException $e)
+		catch (\Exception $e)
 		{
 			throw new IdpRemoteException($e);
 		}
 
-		$data = self::processResponse($response);
+		self::$serverToken = new IdpServerToken(self::processResponse($response));;
 
-		$token = new IdpServerToken($data);
-
-		self::$serverToken = $token;
-
-		return $token;
+		return self::$serverToken;
 	}
 
 	/**
@@ -151,25 +140,19 @@ class IdpClient
 	public static function createOrganization(
 		IdpOrganization $organization): IdpOrganization
 	{
-		$serverToken = self::getServerToken();
-
 		try
 		{
-			$response = self::getFriendlyApi()
-				->setMethod(FriendlyApi::POST)
-				->setPath('api/v1/organization')
-				->addHeader('Authorization', $serverToken->getTokenHeaderValue())
-				->setJsonQuery($organization->toArray())
-				->send();
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->asJson()
+				->post('api/v1/organization', $organization->toArray());
 		}
-		catch (FriendlyApiException $e)
+		catch (\Exception $e)
 		{
 			throw new IdpRemoteException($e);
 		}
 
-		$data = self::processResponse($response);
-
-		return new IdpOrganization($data);
+		return new IdpOrganization(self::processResponse($response));
 	}
 
 	/**
@@ -178,33 +161,22 @@ class IdpClient
 	public static function updateOrganization(string $organizationId,
 		IdpOrganization $organization): IdpOrganization
 	{
-		if (empty($organizationId))
-		{
-			throw new IdpInvalidArgumentException(
-				'updateOrganization',
-				'Organization Id (string)',
-				$organizationId);
-		}
-
-		$serverToken = self::getServerToken();
-
 		try
 		{
-			$response = self::getFriendlyApi()
-				->setMethod(FriendlyApi::PATCH)
-				->setPath("api/v1/organization/{$organizationId}")
-				->addHeader('Authorization', $serverToken->getTokenHeaderValue())
-				->setJsonQuery($organization->toArray())
-				->send();
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->asJson()
+				->patch(
+					"api/v1/organization/{$organizationId}",
+					$organization->toArray()
+				);
 		}
-		catch (FriendlyApiException $e)
+		catch (\Exception $e)
 		{
 			throw new IdpRemoteException($e);
 		}
 
-		$data = self::processResponse($response);
-
-		return new IdpOrganization($data);
+		return new IdpOrganization(self::processResponse($response));
 	}
 
 	/**
@@ -212,25 +184,19 @@ class IdpClient
 	 */
 	public static function registerUser(IdpUser $user): IdpUser
 	{
-		$serverToken = self::getServerToken();
-
 		try
 		{
-			$response = self::getFriendlyApi()
-				->setMethod(FriendlyApi::POST)
-				->setPath('api/v1/user')
-				->addHeader('Authorization', $serverToken->getTokenHeaderValue())
-				->setJsonQuery($user->toArray())
-				->send();
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->asJson()
+				->post('api/v1/user', $user->toArray());
 		}
-		catch (FriendlyApiException $e)
+		catch (\Exception $e)
 		{
 			throw new IdpRemoteException($e);
 		}
 
-		$data = self::processResponse($response);
-
-		return new IdpUser($data);
+		return new IdpUser(self::processResponse($response));
 	}
 
 	/**
@@ -238,33 +204,21 @@ class IdpClient
 	 */
 	public static function listUsers(int $page = 1): IdpPaginatedList
 	{
-		$serverToken = self::getServerToken();
-
 		try
 		{
-			$response = self::getFriendlyApi()
-				->setMethod(FriendlyApi::GET)
-				->setPath('api/v1/users')
-				->addHeader('Authorization', $serverToken->getTokenHeaderValue())
-				->setQuery(['page' => $page])
-				->send();
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->get('api/v1/users', ['page' => $page]);
 		}
-		catch (FriendlyApiException $e)
+		catch (\Exception $e)
 		{
 			throw new IdpRemoteException($e);
 		}
 
-		$data = self::processResponse($response);
-
-		$users = [];
-		foreach ($data['data'] as $user)
-		{
-			$users[] = new IdpUser($user);
-		}
-
-		$data['data'] = $users;
-
-		return new IdpPaginatedList($data);
+		return new IdpPaginatedList(
+			self::processResponse($response),
+			IdpUser::class
+		);
 	}
 
 	/**
@@ -272,32 +226,18 @@ class IdpClient
 	 */
 	public static function getUser(string $userId): IdpUser
 	{
-		if (empty($userId))
-		{
-			throw new IdpInvalidArgumentException(
-				'getUser',
-				'User Id (string)',
-				$userId);
-		}
-
-		$serverToken = self::getServerToken();
-
 		try
 		{
-			$response = self::getFriendlyApi()
-				->setMethod(FriendlyApi::GET)
-				->setPath("api/v1/user/{$userId}")
-				->addHeader('Authorization', $serverToken->getTokenHeaderValue())
-				->send();
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->get("api/v1/user/{$userId}");
 		}
-		catch (FriendlyApiException $e)
+		catch (\Exception $e)
 		{
 			throw new IdpRemoteException($e);
 		}
 
-		$data = self::processResponse($response);
-
-		return new IdpUser($data);
+		return new IdpUser(self::processResponse($response));
 	}
 
 	/**
@@ -305,30 +245,20 @@ class IdpClient
 	 */
 	public static function deleteUser(string $userId): void
 	{
-		if (empty($userId))
-		{
-			throw new IdpInvalidArgumentException(
-				'deleteUser',
-				'User Id (string)',
-				$userId);
-		}
-
 		$serverToken = self::getServerToken();
 
 		try
 		{
-			$response = self::getFriendlyApi()
-				->setMethod(FriendlyApi::DELETE)
-				->setPath("api/v1/user/{$userId}")
-				->addHeader('Authorization', $serverToken->getTokenHeaderValue())
-				->send();
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->delete("api/v1/user/{$userId}");
 		}
-		catch (FriendlyApiException $e)
+		catch (\Exception $e)
 		{
 			throw new IdpRemoteException($e);
 		}
 
-		$data = self::processResponse($response);
+		self::processResponse($response);
 	}
 
 	/**
@@ -336,32 +266,18 @@ class IdpClient
 	 */
 	public static function associateUser(string $userId): IdpUser
 	{
-		if (empty($userId))
-		{
-			throw new IdpInvalidArgumentException(
-				'associateUser',
-				'User Id (string)',
-				$userId);
-		}
-
-		$serverToken = self::getServerToken();
-
 		try
 		{
-			$response = self::getFriendlyApi()
-				->setMethod(FriendlyApi::PATCH)
-				->setPath("api/v1/user/{$userId}/organization")
-				->addHeader('Authorization', $serverToken->getTokenHeaderValue())
-				->send();
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->patch("api/v1/user/{$userId}/organization");
 		}
-		catch (FriendlyApiException $e)
+		catch (\Exception $e)
 		{
 			throw new IdpRemoteException($e);
 		}
 
-		$data = self::processResponse($response);
-
-		return new IdpUser($data);
+		return new IdpUser(self::processResponse($response));
 	}
 
 	/**
@@ -369,37 +285,23 @@ class IdpClient
 	 */
 	public static function associateUserToken(string $userToken): IdpUser
 	{
-		if (empty($userToken))
-		{
-			throw new IdpInvalidArgumentException(
-				'associateUserToken',
-				'User Token (string)',
-				$userToken);
-		}
-
-		$serverToken = self::getServerToken();
-
 		self::validateUserToken($userToken);
 
 		try
 		{
-			$response = self::getFriendlyApi()
-				->setMethod(FriendlyApi::POST)
-				->setPath('api/v1/user/organization/token')
-				->addHeader('Authorization', $serverToken->getTokenHeaderValue())
-				->setJsonQuery([
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->asJson()
+				->post('api/v1/user/organization/token', [
 					'access_token' => $userToken
-				])
-				->send();
+				]);
 		}
-		catch (FriendlyApiException $e)
+		catch (\Exception $e)
 		{
 			throw new IdpRemoteException($e);
 		}
 
-		$data = self::processResponse($response);
-
-		return new IdpUser($data);
+		return new IdpUser(self::processResponse($response));
 	}
 
 	/**
@@ -407,35 +309,21 @@ class IdpClient
 	 */
 	public static function validateUserToken(string $userToken): IdpUser
 	{
-		if (empty($userToken))
-		{
-			throw new IdpInvalidArgumentException(
-				'validateUserToken',
-				'User Token (string)',
-				$userToken);
-		}
-
-		$serverToken = self::getServerToken();
-
 		try
 		{
-			$response = self::getFriendlyApi()
-				->setMethod(FriendlyApi::POST)
-				->setPath('api/v1/user/token')
-				->addHeader('Authorization', $serverToken->getTokenHeaderValue())
-				->setJsonQuery([
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->asJson()
+				->post('api/v1/user/token', [
 					'access_token' => $userToken
-				])
-				->send();
+				]);
 		}
-		catch (FriendlyApiException $e)
+		catch (\Exception $e)
 		{
 			throw new IdpRemoteException($e);
 		}
 
-		$data = self::processResponse($response);
-
-		return new IdpUser($data);
+		return new IdpUser(self::processResponse($response));
 	}
 	//endregion
 }

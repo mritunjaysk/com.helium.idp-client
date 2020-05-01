@@ -20,9 +20,4 @@ class IdpServerToken extends OfflineModel
 		'expires_in',
 		'access_token'
 	];
-
-	public function getTokenHeaderValue(): string
-	{
-		return "{$this->token_type} {$this->access_token}";
-	}
 }

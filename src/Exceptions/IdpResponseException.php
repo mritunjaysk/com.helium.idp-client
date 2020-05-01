@@ -22,8 +22,8 @@ class IdpResponseException extends IdpException
 		$this->messages = $messages;
 
 		$exceptionMessage = "IDP Request Failed. See ";
-		$exceptionMessage .= "IdpResponseException::getMessages ";
-		$exceptionMessage .= "for more information";
+		$exceptionMessage .= "IdpResponseException::toArray ";
+		$exceptionMessage .= "for more information.";
 
 		parent::__construct($exceptionMessage);
 	}
@@ -32,7 +32,7 @@ class IdpResponseException extends IdpException
 	 * @description Get HTTP Status Code of the failed request
 	 * @return int
 	 */
-	public function getHttpStatusCode(): int
+	public function status(): int
 	{
 		return $this->httpStatusCode;
 	}
@@ -41,7 +41,7 @@ class IdpResponseException extends IdpException
 	 * @description Get response messages
 	 * @return array
 	 */
-	public function getMessages(): array
+	public function toArray(): array
 	{
 		return $this->messages;
 	}

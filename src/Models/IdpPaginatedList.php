@@ -37,4 +37,16 @@ class IdpPaginatedList extends OfflineModel
 		'current_page',
 		'last_page'
 	];
+
+	public function __construct(array $attributes = [], ?string $type = null)
+	{
+		if (isset($attributes['data']) && !is_null($type))
+		{
+			$attributes['data'] = collect($attributes['data'])
+				->map(fn($datum) => new $type($datum))
+				->all();
+		}
+
+		parent::__construct($attributes);
+	}
 }
