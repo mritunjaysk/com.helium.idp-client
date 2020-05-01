@@ -12,8 +12,10 @@ use Helium\IdpClient\Models\IdpPaginatedList;
 use Helium\IdpClient\Models\IdpServerToken;
 use Helium\IdpClient\Models\IdpUser;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
+use Illuminate\Http\Client\ResponseSequence;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -34,14 +36,19 @@ class IdpClient
 {
 	//region Base
 	protected static $serverToken;
+
+	protected static $fakeSequence;
 	//endregion
 
 	//region Testing
-	public static function fake()
+	public static function fake(callable $callback = null): Factory
 	{
-		Http::fake(function() {
-			return Http::response([], 200);
-		});
+		return Http::fake($callback);
+	}
+
+	public static function fakeSequence(string $urlPattern = '*'): ResponseSequence
+	{
+		return Http::fakeSequence($urlPattern);
 	}
 	//endregion
 
