@@ -12,8 +12,10 @@ use Helium\IdpClient\Models\IdpUser;
 use Exception;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Request;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Orchestra\Testbench\TestCase;
 
 class IdpClientTest extends TestCase
@@ -84,6 +86,18 @@ class IdpClientTest extends TestCase
 		$response = IdpClient::getServerToken();
 
 		$this->assertInstanceOf(IdpServerToken::class, $response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'POST';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			$data = $request->data();
+			return isset($data['grant_type'])
+				&& isset($data['client_id'])
+				&& isset($data['client_secret'])
+				&& isset($data['scope']);
+		});
 	}
 
 	public function testCreateOrganization()
@@ -94,6 +108,14 @@ class IdpClientTest extends TestCase
 		$response = IdpClient::createOrganization($organization);
 
 		$this->assertInstanceOf(IdpOrganization::class, $response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'POST';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
 	}
 
 	public function testCreateOrganizationUnsuccessful()
@@ -139,6 +161,18 @@ class IdpClientTest extends TestCase
 		$response = IdpClient::updateOrganization('ORG-123', $organization);
 
 		$this->assertInstanceOf(IdpOrganization::class, $response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'PATCH';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return Str::of($request->url())->contains('ORG-123');
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
 	}
 
 	public function testUpdateOrganizationUnsuccessful()
@@ -184,6 +218,14 @@ class IdpClientTest extends TestCase
 		$response = IdpClient::registerUser($user);
 
 		$this->assertInstanceOf(IdpUser::class, $response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'POST';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
 	}
 
 	public function testRegisterUserUnsuccessful()
@@ -238,6 +280,14 @@ class IdpClientTest extends TestCase
 		{
 			$this->assertInstanceOf(IdpUser::class, $datum);
 		}
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'GET';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
 	}
 
 	public function testListUsersUnsuccessful()
@@ -281,6 +331,14 @@ class IdpClientTest extends TestCase
 		$response = IdpClient::getUser($user);
 
 		$this->assertInstanceOf(IdpUser::class, $response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'GET';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
 	}
 
 	public function testGetUserUnsuccessful()
@@ -325,6 +383,18 @@ class IdpClientTest extends TestCase
 		$response = IdpClient::deleteUser('USR-123');
 
 		$this->assertNull($response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'DELETE';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return Str::of($request->url())->contains('USR-123');
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
 	}
 
 	public function testDeleteUserUnsuccessful()
@@ -367,6 +437,18 @@ class IdpClientTest extends TestCase
 		$response = IdpClient::associateUser('USR-123');
 
 		$this->assertInstanceOf(IdpUser::class, $response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'PATCH';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return Str::of($request->url())->contains('USR-123');
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
 	}
 
 	public function testAssociateUserUnsuccessful()
@@ -410,6 +492,18 @@ class IdpClientTest extends TestCase
 		$response = IdpClient::associateUserToken('abc123');
 
 		$this->assertInstanceOf(IdpUser::class, $response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'POST';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return isset($request->data()['access_token']);
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
 	}
 
 	public function testAssociateUserTokenUnsuccessful()
@@ -454,6 +548,18 @@ class IdpClientTest extends TestCase
 		$response = IdpClient::validateUserToken('abc123');
 
 		$this->assertInstanceOf(IdpUser::class, $response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'POST';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return isset($request->data()['access_token']);
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
 	}
 
 	public function testValidateUserTokenUnsuccessful()

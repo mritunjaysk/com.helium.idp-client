@@ -28,7 +28,10 @@
 		"laravel": {
 			"providers": [
 				"Helium\\IdpClient\\Providers\\IdpServiceProvider"
-			]
+			],
+			"aliases": {
+				"IdpClient": "Helium\\IdpClient\\IdpClient"
+			}
 		}
 	}
 }

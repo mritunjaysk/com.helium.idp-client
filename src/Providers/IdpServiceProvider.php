@@ -16,7 +16,7 @@ class IdpServiceProvider extends ServiceProvider
 	{
 		$this->mergeConfigFrom(__DIR__ . '/../config/idp.php', 'idp');
 
-		$this->app('router')->aliasMiddleware('idp-auth', IdpAuthenticate::class);
+		app('router')->aliasMiddleware('idp-auth', IdpAuthenticate::class);
 	}
 
 	/**
