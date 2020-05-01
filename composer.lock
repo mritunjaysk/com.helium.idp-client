@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a1ed944a6c9f2f45879db7d2b1cc206c",
+    "content-hash": "974dfb1c733fbbfe1fc2009f5b1aea7a",
     "packages": [
         {
             "name": "brick/math",
@@ -481,86 +481,6 @@
                 "url"
             ],
             "time": "2019-07-01T23:21:34+00:00"
-        },
-        {
-            "name": "helium/friendly-api",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://bitbucket.org/teamhelium/com.helium.friendly-api.git",
-                "reference": "95afe0f7e6534a43d728bb2a3dc2a46e1cff0899"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://bitbucket.org/teamhelium/com.helium.friendly-api/get/95afe0f7e6534a43d728bb2a3dc2a46e1cff0899.zip",
-                "reference": "95afe0f7e6534a43d728bb2a3dc2a46e1cff0899",
-                "shasum": ""
-            },
-            "require": {
-                "guzzlehttp/guzzle": "^6.5",
-                "helium/service-manager": "^1.0.1"
-            },
-            "require-dev": {
-                "orchestra/testbench": "^5.2"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Helium\\FriendlyApi\\": "src/",
-                    "Helium\\FriendlyApi\\Tests\\": "tests/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Nick Rupert",
-                    "email": "nick@heliumservices.com"
-                }
-            ],
-            "description": "A friendly wrapper for making remote API calls",
-            "homepage": "https://bitbucket.org/teamhelium/com.helium.friendly-api",
-            "time": "2020-04-29T19:30:47+00:00"
-        },
-        {
-            "name": "helium/service-manager",
-            "version": "1.0.1",
-            "source": {
-                "type": "git",
-                "url": "https://bitbucket.org/teamhelium/com.helium.service-manager.git",
-                "reference": "7573fedabe1ec5679bbeba78eee92de10cbc66db"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://bitbucket.org/teamhelium/com.helium.service-manager/get/7573fedabe1ec5679bbeba78eee92de10cbc66db.zip",
-                "reference": "7573fedabe1ec5679bbeba78eee92de10cbc66db",
-                "shasum": ""
-            },
-            "require-dev": {
-                "orchestra/testbench": "^5.1"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Helium\\ServiceManager\\": "src",
-                    "Helium\\ServiceManager\\Tests\\": "tests"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Nick Rupert",
-                    "email": "nick@heliumservices.com"
-                }
-            ],
-            "description": "A reusable template for backing custom services with any number of custom engines.",
-            "homepage": "https://bitbucket.org/teamhelium/com.helium.service-manager",
-            "time": "2020-04-29T19:21:21+00:00"
         },
         {
             "name": "jenssegers/model",
@@ -4163,16 +4083,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "9.1.3",
+            "version": "9.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "a74780472172957a65cb5999a597e8c0878cf39c"
+                "reference": "2d7080c622cf7884992e7c3cf87853877bae8ff4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/a74780472172957a65cb5999a597e8c0878cf39c",
-                "reference": "a74780472172957a65cb5999a597e8c0878cf39c",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/2d7080c622cf7884992e7c3cf87853877bae8ff4",
+                "reference": "2d7080c622cf7884992e7c3cf87853877bae8ff4",
                 "shasum": ""
             },
             "require": {
@@ -4193,7 +4113,7 @@
                 "phpunit/php-invoker": "^3.0",
                 "phpunit/php-text-template": "^2.0",
                 "phpunit/php-timer": "^3.1.4",
-                "sebastian/code-unit": "^1.0",
+                "sebastian/code-unit": "^1.0.2",
                 "sebastian/comparator": "^4.0",
                 "sebastian/diff": "^4.0",
                 "sebastian/environment": "^5.0.1",
@@ -4247,20 +4167,20 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2020-04-23T04:42:05+00:00"
+            "time": "2020-04-30T06:32:53+00:00"
         },
         {
             "name": "sebastian/code-unit",
-            "version": "1.0.1",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/code-unit.git",
-                "reference": "00d2094a93573796ec6666401be467fa6efcd86a"
+                "reference": "ac958085bc19fcd1d36425c781ef4cbb5b06e2a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/code-unit/zipball/00d2094a93573796ec6666401be467fa6efcd86a",
-                "reference": "00d2094a93573796ec6666401be467fa6efcd86a",
+                "url": "https://api.github.com/repos/sebastianbergmann/code-unit/zipball/ac958085bc19fcd1d36425c781ef4cbb5b06e2a5",
+                "reference": "ac958085bc19fcd1d36425c781ef4cbb5b06e2a5",
                 "shasum": ""
             },
             "require": {
@@ -4293,7 +4213,7 @@
             ],
             "description": "Collection of value objects that represent the PHP code units",
             "homepage": "https://github.com/sebastianbergmann/code-unit",
-            "time": "2020-04-27T06:25:01+00:00"
+            "time": "2020-04-30T05:58:10+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
