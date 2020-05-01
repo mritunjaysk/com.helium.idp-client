@@ -36,6 +36,15 @@ class IdpClient
 	protected static $serverToken;
 	//endregion
 
+	//region Testing
+	public static function fake()
+	{
+		Http::fake(function() {
+			return Http::response([], 200);
+		});
+	}
+	//endregion
+
 	//region Helpers
 	protected static function getBaseUrl(): string
 	{
@@ -105,7 +114,7 @@ class IdpClient
 	}
 	//endregion
 
-	//region Contract
+	//region Calls
 	public static function getServerToken(): IdpServerToken
 	{
 		if (self::$serverToken)
