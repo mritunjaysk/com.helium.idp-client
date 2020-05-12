@@ -9,7 +9,7 @@ use Helium\IdpClient\Exceptions\IdpRemoteException;
 use Helium\IdpClient\Exceptions\IdpResponseException;
 use Helium\IdpClient\Models\IdpOrganization;
 use Helium\IdpClient\Models\IdpPaginatedList;
-use Helium\IdpClient\Models\IdpServerToken;
+use Helium\IdpClient\Models\IdpAccessToken;
 use Helium\IdpClient\Models\IdpUser;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory;
@@ -122,7 +122,13 @@ class IdpClient
 	//endregion
 
 	//region Calls
-	public static function getServerToken(): IdpServerToken
+	/**
+	 * @description Get Server Client token
+	 * @return IdpAccessToken
+	 * @throws IdpException
+	 * @throws IdpRemoteException
+	 */
+	public static function getServerToken(): IdpAccessToken
 	{
 		if (self::$serverToken)
 		{
@@ -145,13 +151,17 @@ class IdpClient
 			throw new IdpRemoteException($e);
 		}
 
-		self::$serverToken = new IdpServerToken(self::processResponse($response));;
+		self::$serverToken = new IdpAccessToken(self::processResponse($response));;
 
 		return self::$serverToken;
 	}
 
 	/**
-	 * @inheritDoc
+	 * @description Create Organization (available for Admins only)
+	 * @param IdpOrganization $organization
+	 * @return IdpOrganization
+	 * @throws IdpException
+	 * @throws IdpRemoteException
 	 */
 	public static function createOrganization(
 		IdpOrganization $organization): IdpOrganization
@@ -172,7 +182,13 @@ class IdpClient
 	}
 
 	/**
-	 * @inheritDoc
+	 * @description Update Organization (available for Admins and the current org
+	 * only)
+	 * @param string $organizationId
+	 * @param IdpOrganization $organization
+	 * @return IdpOrganization
+	 * @throws IdpException
+	 * @throws IdpRemoteException
 	 */
 	public static function updateOrganization(string $organizationId,
 		IdpOrganization $organization): IdpOrganization
@@ -196,7 +212,11 @@ class IdpClient
 	}
 
 	/**
-	 * @inheritDoc
+	 * @description Register new user with the current org
+	 * @param IdpUser $user
+	 * @return IdpUser
+	 * @throws IdpException
+	 * @throws IdpRemoteException
 	 */
 	public static function registerUser(IdpUser $user): IdpUser
 	{
@@ -216,7 +236,11 @@ class IdpClient
 	}
 
 	/**
-	 * @inheritDoc
+	 * @description List all users for the current organization
+	 * @param int $page
+	 * @return IdpPaginatedList
+	 * @throws IdpException
+	 * @throws IdpRemoteException
 	 */
 	public static function listUsers(int $page = 1): IdpPaginatedList
 	{
@@ -238,7 +262,11 @@ class IdpClient
 	}
 
 	/**
-	 * @inheritDoc
+	 * @description Get user's info for this organization
+	 * @param string $userId
+	 * @return IdpUser
+	 * @throws IdpException
+	 * @throws IdpRemoteException
 	 */
 	public static function getUser(string $userId): IdpUser
 	{
@@ -257,7 +285,10 @@ class IdpClient
 	}
 
 	/**
-	 * @inheritDoc
+	 * @description Disassociate the specified user from the current organization
+	 * @param string $userId
+	 * @throws IdpException
+	 * @throws IdpRemoteException
 	 */
 	public static function deleteUser(string $userId): void
 	{
@@ -278,7 +309,11 @@ class IdpClient
 	}
 
 	/**
-	 * @inheritDoc
+	 * @description Associate an existing user with the current organization
+	 * @param string $userId
+	 * @return IdpUser
+	 * @throws IdpException
+	 * @throws IdpRemoteException
 	 */
 	public static function associateUser(string $userId): IdpUser
 	{
@@ -297,7 +332,11 @@ class IdpClient
 	}
 
 	/**
-	 * @inheritDoc
+	 * @description Associate an existing user with the current organization
+	 * @param string $userToken
+	 * @return IdpUser
+	 * @throws IdpException
+	 * @throws IdpRemoteException
 	 */
 	public static function associateUserToken(string $userToken): IdpUser
 	{
@@ -321,7 +360,34 @@ class IdpClient
 	}
 
 	/**
-	 * @inheritDoc
+	 * @description In development environments only, retrieve an active user token
+	 * for testing authenticated endpoints
+	 * @param string $userId
+	 * @return IdpAccessToken
+	 * @throws IdpRemoteException
+	 */
+	public static function getDevUserToken(string $userId): IdpAccessToken
+	{
+		try
+		{
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->get("api/v1/user/$userId/token");
+		}
+		catch (\Exception $e)
+		{
+			throw new IdpRemoteException($e);
+		}
+
+		return new IdpAccessToken(self::processResponse($response));
+	}
+
+	/**
+	 * @description Validate the given user token is active
+	 * @param string $userToken
+	 * @return IdpUser
+	 * @throws IdpException
+	 * @throws IdpRemoteException
 	 */
 	public static function validateUserToken(string $userToken): IdpUser
 	{
@@ -340,6 +406,34 @@ class IdpClient
 		}
 
 		return new IdpUser(self::processResponse($response));
+	}
+
+	/**
+	 * @description Impersonate the specified user (available to Admins only)
+	 * @param string $userId
+	 * @param string $userToken Current admin user's token
+	 * @return IdpAccessToken
+	 * @throws IdpException
+	 * @throws IdpRemoteException
+	 */
+	public static function impersonateUser(string $userId,
+		string $userToken): IdpAccessToken
+	{
+		try
+		{
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->asJson()
+				->post("api/v1/user/{$userId}/impersonate", [
+					'requesting_access_token' => $userToken
+				]);
+		}
+		catch (\Exception $e)
+		{
+			throw new IdpRemoteException($e);
+		}
+
+		return new IdpAccessToken(self::processResponse($response));
 	}
 	//endregion
 }

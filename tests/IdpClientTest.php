@@ -7,7 +7,7 @@ use Helium\IdpClient\Exceptions\IdpResponseException;
 use Helium\IdpClient\IdpClient;
 use Helium\IdpClient\Models\IdpOrganization;
 use Helium\IdpClient\Models\IdpPaginatedList;
-use Helium\IdpClient\Models\IdpServerToken;
+use Helium\IdpClient\Models\IdpAccessToken;
 use Helium\IdpClient\Models\IdpUser;
 use Exception;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
@@ -85,7 +85,7 @@ class IdpClientTest extends TestCase
 
 		$response = IdpClient::getServerToken();
 
-		$this->assertInstanceOf(IdpServerToken::class, $response);
+		$this->assertInstanceOf(IdpAccessToken::class, $response);
 
 		Http::assertSent(function (Request $request, Response $response) {
 			return $request->method() == 'POST';
@@ -541,6 +541,60 @@ class IdpClientTest extends TestCase
 		}
 	}
 
+	public function testGetDevUserToken()
+	{
+		$this->fakeSuccessfulRequest();
+
+		$response = IdpClient::getDevUserToken('USR-123');
+
+		$this->assertInstanceOf(IdpAccessToken::class, $response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'GET';
+		});
+
+		Http::assertSent(function (Request $request, Response $resposne) {
+			return Str::of($request->url())->contains('USR-123');
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
+	}
+
+	public function testGetDevUserTokenUnsuccessful()
+	{
+		$this->fakeUnsuccessfulRequest();
+
+		try
+		{
+			$response = IdpClient::getDevUserToken('USR-123');
+
+			$this->assertTrue(false);
+		}
+		catch (Exception $e)
+		{
+			$this->assertInstanceOf(IdpResponseException::class, $e);
+		}
+	}
+
+	public function testGetDevUserTokenException()
+	{
+		//By not pushing a new response to the HTTP fake response sequence, an
+		//exception will be thrown
+
+		try
+		{
+			$response = IdpClient::getDevUserToken('USR-123');
+
+			$this->assertTrue(false);
+		}
+		catch (Exception $e)
+		{
+			$this->assertInstanceOf(IdpRemoteException::class, $e);
+		}
+	}
+
 	public function testValidateUserToken()
 	{
 		$this->fakeSuccessfulRequest();
@@ -586,6 +640,64 @@ class IdpClientTest extends TestCase
 		try
 		{
 			$response = IdpClient::validateUserToken('abc123');
+
+			$this->assertTrue(false);
+		}
+		catch (Exception $e)
+		{
+			$this->assertInstanceOf(IdpRemoteException::class, $e);
+		}
+	}
+
+	public function testImpersonateUser()
+	{
+		$this->fakeSuccessfulRequest();
+
+		$response = IdpClient::impersonateUser('USR-123', 'abc123');
+
+		$this->assertInstanceOf(IdpAccessToken::class, $response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'POST';
+		});
+
+		Http::assertSent(function (Request $request, Response $resposne) {
+			return Str::of($request->url())->contains('USR-123');
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return isset($request->data()['requesting_access_token']);
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
+	}
+
+	public function testImpersonateUserUnsuccessful()
+	{
+		$this->fakeUnsuccessfulRequest();
+
+		try
+		{
+			$response = IdpClient::impersonateUser('USR-123', 'abc123');
+
+			$this->assertTrue(false);
+		}
+		catch (Exception $e)
+		{
+			$this->assertInstanceOf(IdpResponseException::class, $e);
+		}
+	}
+
+	public function testImpersonateUserException()
+	{
+		//By not pushing a new response to the HTTP fake response sequence, an
+		//exception will be thrown
+
+		try
+		{
+			$response = IdpClient::impersonateUser('USR-123', 'abc123');
 
 			$this->assertTrue(false);
 		}

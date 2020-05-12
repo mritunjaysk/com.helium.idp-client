@@ -13,8 +13,12 @@ use Jenssegers\Model\Model as OfflineModel;
  * @property int $expires_in
  * @property string $access_token
  */
-class IdpServerToken extends OfflineModel
+class IdpAccessToken extends OfflineModel
 {
+	protected $attributes = [
+		'token_type' => 'Bearer'
+	];
+
 	protected $fillable = [
 		'token_type',
 		'expires_in',
