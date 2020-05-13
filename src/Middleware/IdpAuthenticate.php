@@ -56,7 +56,7 @@ class IdpAuthenticate
 		    	$this->unauthenticated();
 		    }
 	    }
-	    catch (\Exception $e)
+	    catch (\Throwable $e)
 	    {
 		    /**
 		     * If anything goes wrong, including a failed request to the Idp, an
