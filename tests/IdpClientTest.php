@@ -153,6 +153,166 @@ class IdpClientTest extends TestCase
 		}
 	}
 
+	public function testListOrganizations()
+	{
+		$this->fakeSuccessfulRequest([
+			'data' => [
+				[]
+			]
+		]);
+
+		$response = IdpClient::listOrganizations();
+
+		$this->assertInstanceOf(IdpPaginatedList::class, $response);
+		$this->assertIsArray($response->data);
+
+		foreach ($response->data as $datum)
+		{
+			$this->assertInstanceOf(IdpOrganization::class, $datum);
+		}
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'GET';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
+	}
+
+	public function testListOrganizationsUnsuccessful()
+	{
+		$this->fakeUnsuccessfulRequest();
+
+		try
+		{
+			$response = IdpClient::listOrganizations();
+
+			$this->assertTrue(false);
+		}
+		catch (Exception $e)
+		{
+			$this->assertInstanceOf(IdpResponseException::class, $e);
+		}
+	}
+
+	public function testListOrganizationsException()
+	{
+		//By not pushing a new response to the HTTP fake response sequence, an
+		//exception will be thrown
+
+		try
+		{
+			$response = IdpClient::listOrganizations();
+
+			$this->assertTrue(false);
+		}
+		catch (Exception $e)
+		{
+			$this->assertInstanceOf(IdpRemoteException::class, $e);
+		}
+	}
+
+	public function testGetOrganization()
+	{
+		$this->fakeSuccessfulRequest();
+
+		$response = IdpClient::getOrganization('ORG-1234567890');
+
+		$this->assertInstanceOf(IdpOrganization::class, $response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'GET';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
+	}
+
+	public function testGetOrganizationUnsuccessful()
+	{
+		$this->fakeUnsuccessfulRequest();
+
+		try
+		{
+			$response = IdpClient::getOrganization('ORG-1234567890');
+
+			$this->assertTrue(false);
+		}
+		catch (Exception $e)
+		{
+			$this->assertInstanceOf(IdpResponseException::class, $e);
+		}
+	}
+
+	public function testGetOrganizationException()
+	{
+		//By not pushing a new response to the HTTP fake response sequence, an
+		//exception will be thrown
+
+		try
+		{
+			$response = IdpClient::getOrganization('ORG-1234567890');
+
+			$this->assertTrue(false);
+		}
+		catch (Exception $e)
+		{
+			$this->assertInstanceOf(IdpRemoteException::class, $e);
+		}
+	}
+
+	public function testGetMyOrganization()
+	{
+		$this->fakeSuccessfulRequest();
+
+		$response = IdpClient::getMyOrganization();
+
+		$this->assertInstanceOf(IdpOrganization::class, $response);
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return $request->method() == 'GET';
+		});
+
+		Http::assertSent(function (Request $request, Response $response) {
+			return count($request->header('Authorization')) == 1;
+		});
+	}
+
+	public function testGetMyOrganizationUnsuccessful()
+	{
+		$this->fakeUnsuccessfulRequest();
+
+		try
+		{
+			$response = IdpClient::getMyOrganization();
+
+			$this->assertTrue(false);
+		}
+		catch (Exception $e)
+		{
+			$this->assertInstanceOf(IdpResponseException::class, $e);
+		}
+	}
+
+	public function testGetMyOrganizationException()
+	{
+		//By not pushing a new response to the HTTP fake response sequence, an
+		//exception will be thrown
+
+		try
+		{
+			$response = IdpClient::getMyOrganization();
+
+			$this->assertTrue(false);
+		}
+		catch (Exception $e)
+		{
+			$this->assertInstanceOf(IdpRemoteException::class, $e);
+		}
+	}
+
 	public function testUpdateOrganization()
 	{
 		$this->fakeSuccessfulRequest();
@@ -327,8 +487,7 @@ class IdpClientTest extends TestCase
 	{
 		$this->fakeSuccessfulRequest();
 
-		$user = new IdpUser();
-		$response = IdpClient::getUser($user);
+		$response = IdpClient::getUser('USR-1234567890');
 
 		$this->assertInstanceOf(IdpUser::class, $response);
 
@@ -347,8 +506,7 @@ class IdpClientTest extends TestCase
 
 		try
 		{
-			$user = new IdpUser();
-			$response = IdpClient::getUser($user);
+			$response = IdpClient::getUser('USR-1234567890');
 
 			$this->assertTrue(false);
 		}
@@ -365,8 +523,7 @@ class IdpClientTest extends TestCase
 
 		try
 		{
-			$user = new IdpUser();
-			$response = IdpClient::getUser($user);
+			$response = IdpClient::getUser('USR-1234567890');
 
 			$this->assertTrue(false);
 		}

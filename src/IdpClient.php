@@ -182,6 +182,86 @@ class IdpClient
 	}
 
 	/**
+	 * @description List all organizations
+	 * @return IdpPaginatedList
+	 * @throws IdpException
+	 * @throws IdpRemoteException
+	 */
+	public static function listOrganizations(): IdpPaginatedList
+	{
+		try
+		{
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->asJson()
+				->get(
+					"api/v1/organizations"
+				);
+		}
+		catch (\Exception $e)
+		{
+			throw new IdpRemoteException($e);
+		}
+
+		return new IdpPaginatedList(
+			self::processResponse($response),
+			IdpOrganization::class
+		);
+	}
+
+	/**
+	 * @description Retrieve the specified organization
+	 * @param string $organizationId
+	 * @return IdpOrganization
+	 * @throws IdpException
+	 * @throws IdpRemoteException
+	 */
+	public static function getOrganization(string $organizationId): IdpOrganization
+	{
+		try
+		{
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->asJson()
+				->get(
+					"api/v1/organization/{$organizationId}"
+				);
+		}
+		catch (\Exception $e)
+		{
+			throw new IdpRemoteException($e);
+		}
+
+		return new IdpOrganization(self::processResponse($response));
+	}
+
+
+	/**
+	 * @description Retrieve the current organization
+	 * @return IdpOrganization
+	 * @throws IdpException
+	 * @throws IdpRemoteException
+	 */
+	public static function getMyOrganization(): IdpOrganization
+	{
+		try
+		{
+			$response = self::getHttp()
+				->withToken(self::getServerToken()->access_token)
+				->asJson()
+				->get(
+					"api/v1/organization/me"
+				);
+		}
+		catch (\Exception $e)
+		{
+			throw new IdpRemoteException($e);
+		}
+
+		return new IdpOrganization(self::processResponse($response));
+	}
+
+	/**
 	 * @description Update Organization (available for Admins and the current org
 	 * only)
 	 * @param string $organizationId
