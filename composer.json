@@ -3,7 +3,7 @@
     "description": "A package for interacting with the Helium IDP service as an application client",
     "type": "library",
     "license": "MIT",
-	"version": "1.2.3",
+	"version": "1.2.4",
     "authors": [
         {
             "name": "Nick Rupert",

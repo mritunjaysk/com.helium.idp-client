@@ -14,9 +14,10 @@ class IdpAuthenticate
 	 * @description Authentication failed, throw AuthenticationException
 	 * @throws AuthenticationException
 	 */
-	protected function unauthenticated()
+	protected function unauthenticated(string $message = null)
 	{
-		throw new AuthenticationException('Failed to authenticate user.');
+		$message = $message ?? 'Failed to authenticate user.';
+		throw new AuthenticationException($message);
 	}
 
     /**
@@ -53,11 +54,18 @@ class IdpAuthenticate
 		     */
 		    if (!$authUser)
 		    {
-		    	$this->unauthenticated();
+		    	$message = config('app.debug') ?
+				    'Could not find the specified user' : null;
+		    	$this->unauthenticated($message);
 		    }
 	    }
 	    catch (\Throwable $e)
 	    {
+	    	if (config('app.debug'))
+		    {
+		    	throw $e;
+		    }
+
 		    /**
 		     * If anything goes wrong, including a failed request to the Idp, an
 		     * unsuccessful response code, or some other general error, the user
