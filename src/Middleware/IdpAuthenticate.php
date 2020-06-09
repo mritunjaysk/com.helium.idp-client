@@ -33,6 +33,10 @@ class IdpAuthenticate
 	     * Get the authorization token from the incoming request
 	     */
     	$authToken = $request->bearerToken();
+    	if (empty($authToken))
+	    {
+	    	$this->unauthenticated('No auth token provided');
+	    }
 
     	try
 	    {
