@@ -37,6 +37,10 @@ class IdpClient
 	//region Base
 	protected static $serverToken;
 
+	protected static $users = [];
+
+	protected static $orgs = [];
+
 	protected static $fakeSequence;
 	//endregion
 
@@ -178,7 +182,11 @@ class IdpClient
 			throw new IdpRemoteException($e);
 		}
 
-		return new IdpOrganization(self::processResponse($response));
+		$org = new IdpOrganization(self::processResponse($response));
+
+		self::$orgs[$org->id] = $org;
+
+		return $org;
 	}
 
 	/**
@@ -203,10 +211,17 @@ class IdpClient
 			throw new IdpRemoteException($e);
 		}
 
-		return new IdpPaginatedList(
+		$list = new IdpPaginatedList(
 			self::processResponse($response),
 			IdpOrganization::class
 		);
+
+		foreach ($list->data as $org)
+		{
+			self::$orgs[$org->id] = $org;
+		}
+
+		return $list;
 	}
 
 	/**
@@ -218,6 +233,11 @@ class IdpClient
 	 */
 	public static function getOrganization(string $organizationId): IdpOrganization
 	{
+		if (array_key_exists($organizationId, self::$orgs))
+		{
+			return self::$orgs[$organizationId];
+		}
+
 		try
 		{
 			$response = self::getHttp()
@@ -232,7 +252,11 @@ class IdpClient
 			throw new IdpRemoteException($e);
 		}
 
-		return new IdpOrganization(self::processResponse($response));
+		$org = new IdpOrganization(self::processResponse($response));
+
+		self::$orgs[$org->id] = $org;
+
+		return $org;
 	}
 
 
@@ -288,7 +312,11 @@ class IdpClient
 			throw new IdpRemoteException($e);
 		}
 
-		return new IdpOrganization(self::processResponse($response));
+		$org = new IdpOrganization(self::processResponse($response));
+
+		self::$orgs[$org->id] = $org;
+
+		return $org;
 	}
 
 	/**
@@ -312,7 +340,11 @@ class IdpClient
 			throw new IdpRemoteException($e);
 		}
 
-		return new IdpUser(self::processResponse($response));
+		$user = new IdpUser(self::processResponse($response));
+
+		self::$users[$user->id] = $user;
+
+		return $user;
 	}
 
 	/**
@@ -335,10 +367,17 @@ class IdpClient
 			throw new IdpRemoteException($e);
 		}
 
-		return new IdpPaginatedList(
+		$list = new IdpPaginatedList(
 			self::processResponse($response),
 			IdpUser::class
 		);
+
+		foreach ($list->data as $user)
+		{
+			self::$users[$user->id] = $user;
+		}
+
+		return $list;
 	}
 
 	/**
@@ -350,6 +389,11 @@ class IdpClient
 	 */
 	public static function getUser(string $userId): IdpUser
 	{
+		if (array_key_exists($userId, self::$users))
+		{
+			return self::$users[$userId];
+		}
+
 		try
 		{
 			$response = self::getHttp()
@@ -361,7 +405,11 @@ class IdpClient
 			throw new IdpRemoteException($e);
 		}
 
-		return new IdpUser(self::processResponse($response));
+		$user = new IdpUser(self::processResponse($response));
+
+		self::$users[$user->id] = $user;
+
+		return $user;
 	}
 
 	/**
@@ -408,7 +456,11 @@ class IdpClient
 			throw new IdpRemoteException($e);
 		}
 
-		return new IdpUser(self::processResponse($response));
+		$user = new IdpUser(self::processResponse($response));
+
+		self::$users[$user->id] = $user;
+
+		return $user;
 	}
 
 	/**
@@ -436,7 +488,11 @@ class IdpClient
 			throw new IdpRemoteException($e);
 		}
 
-		return new IdpUser(self::processResponse($response));
+		$user = new IdpUser(self::processResponse($response));
+
+		self::$users[$user->id] = $user;
+
+		return $user;
 	}
 
 	/**
@@ -485,7 +541,11 @@ class IdpClient
 			throw new IdpRemoteException($e);
 		}
 
-		return new IdpUser(self::processResponse($response));
+		$user = new IdpUser(self::processResponse($response));
+
+		self::$users[$user->id] = $user;
+
+		return $user;
 	}
 
 	/**
