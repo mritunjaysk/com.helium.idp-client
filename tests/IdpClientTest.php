@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\IdentityProvider;
+namespace Helium\IdpClient\Tests;
 
 use Helium\IdpClient\Exceptions\IdpRemoteException;
 use Helium\IdpClient\Exceptions\IdpResponseException;
