@@ -58,9 +58,12 @@ class IdpAuthenticate
 		     */
 		    if (!$authUser)
 		    {
-		    	$message = config('app.debug') ?
-				    'Could not find the specified user' : null;
-		    	$this->unauthenticated($message);
+                /**
+                 * This exception will always be caught in the "catch" block below. If app.debug is true, the same
+                 * exception will be re-thrown, and thus this message will be visible. Otherwise, and a new generic
+                 * Authentication exception will bet thrown.
+                 */
+		    	$this->unauthenticated('Could not find the specified user');
 		    }
 	    }
 	    catch (\Throwable $e)

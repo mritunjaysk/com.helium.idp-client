@@ -3,6 +3,8 @@
 namespace Helium\IdpClient\Providers;
 
 use Helium\IdpClient\Middleware\IdpAuthenticate;
+use Helium\IdpClient\Middleware\IdpScope;
+use Helium\IdpClient\Middleware\IdpScopeAll;
 use Illuminate\Support\ServiceProvider;
 
 class IdpServiceProvider extends ServiceProvider
@@ -17,6 +19,9 @@ class IdpServiceProvider extends ServiceProvider
 		$this->mergeConfigFrom(__DIR__ . '/../config/idp.php', 'idp');
 
 		app('router')->aliasMiddleware('idp-auth', IdpAuthenticate::class);
+		app('router')->aliasMiddleware('idp.auth', IdpAuthenticate::class);
+		app('router')->aliasMiddleware('idp.scope', IdpScope::class);
+		app('router')->aliasMiddleware('idp.scope.all', IdpScopeAll::class);
 	}
 
 	/**
