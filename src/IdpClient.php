@@ -3,15 +3,12 @@
 namespace Helium\IdpClient;
 
 use Helium\IdpClient\Exceptions\Base\IdpException;
-use Helium\IdpClient\Exceptions\IdpInvalidArgumentException;
 use Helium\IdpClient\Exceptions\IdpMissingConfigurationException;
-use Helium\IdpClient\Exceptions\IdpRemoteException;
 use Helium\IdpClient\Exceptions\IdpResponseException;
 use Helium\IdpClient\Models\IdpOrganization;
 use Helium\IdpClient\Models\IdpPaginatedList;
 use Helium\IdpClient\Models\IdpAccessToken;
 use Helium\IdpClient\Models\IdpUser;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -130,7 +127,6 @@ class IdpClient
 	 * @description Get Server Client token
 	 * @return IdpAccessToken
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function getServerToken(): IdpAccessToken
 	{
@@ -139,21 +135,14 @@ class IdpClient
 			return self::$serverToken;
 		}
 
-		try
-		{
-			$response = self::getHttp()
-				->asJson()
-				->post('v1/oauth/token', [
-					'grant_type' => 'client_credentials',
-					'client_id' => self::getClientId(),
-					'client_secret' => self::getClientSecret(),
-					'scope' => '*'
-				]);
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->asJson()
+            ->post('v1/oauth/token', [
+                'grant_type' => 'client_credentials',
+                'client_id' => self::getClientId(),
+                'client_secret' => self::getClientSecret(),
+                'scope' => '*'
+            ]);
 
 		self::$serverToken = new IdpAccessToken(self::processResponse($response));;
 
@@ -165,22 +154,14 @@ class IdpClient
 	 * @param IdpOrganization $organization
 	 * @return IdpOrganization
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function createOrganization(
 		IdpOrganization $organization): IdpOrganization
 	{
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->asJson()
-				->post('api/v1/organization', $organization->toArray());
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->asJson()
+            ->post('api/v1/organization', $organization->toArray());
 
 		$org = new IdpOrganization(self::processResponse($response));
 
@@ -193,23 +174,15 @@ class IdpClient
 	 * @description List all organizations
 	 * @return IdpPaginatedList
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function listOrganizations(): IdpPaginatedList
 	{
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->asJson()
-				->get(
-					"api/v1/organizations"
-				);
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->asJson()
+            ->get(
+                "api/v1/organizations"
+            );
 
 		$list = new IdpPaginatedList(
 			self::processResponse($response),
@@ -229,7 +202,6 @@ class IdpClient
 	 * @param string $organizationId
 	 * @return IdpOrganization
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function getOrganization(string $organizationId): IdpOrganization
 	{
@@ -238,19 +210,12 @@ class IdpClient
 			return self::$orgs[$organizationId];
 		}
 
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->asJson()
-				->get(
-					"api/v1/organization/{$organizationId}"
-				);
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->asJson()
+            ->get(
+                "api/v1/organization/{$organizationId}"
+            );
 
 		$org = new IdpOrganization(self::processResponse($response));
 
@@ -264,23 +229,15 @@ class IdpClient
 	 * @description Retrieve the current organization
 	 * @return IdpOrganization
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function getMyOrganization(): IdpOrganization
 	{
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->asJson()
-				->get(
-					"api/v1/organization/me"
-				);
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->asJson()
+            ->get(
+                "api/v1/organization/me"
+            );
 
 		return new IdpOrganization(self::processResponse($response));
 	}
@@ -292,25 +249,17 @@ class IdpClient
 	 * @param IdpOrganization $organization
 	 * @return IdpOrganization
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function updateOrganization(string $organizationId,
 		IdpOrganization $organization): IdpOrganization
 	{
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->asJson()
-				->patch(
-					"api/v1/organization/{$organizationId}",
-					$organization->toArray()
-				);
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->asJson()
+            ->patch(
+                "api/v1/organization/{$organizationId}",
+                $organization->toArray()
+            );
 
 		$org = new IdpOrganization(self::processResponse($response));
 
@@ -324,21 +273,13 @@ class IdpClient
 	 * @param IdpUser $user
 	 * @return IdpUser
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function registerUser(IdpUser $user): IdpUser
 	{
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->asJson()
-				->post('api/v1/user', $user->toArray());
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->asJson()
+            ->post('api/v1/user', $user->toArray());
 
 		$user = new IdpUser(self::processResponse($response));
 
@@ -352,20 +293,12 @@ class IdpClient
 	 * @param int $page
 	 * @return IdpPaginatedList
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function listUsers(int $page = 1): IdpPaginatedList
 	{
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->get('api/v1/users', ['page' => $page]);
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->get('api/v1/users', ['page' => $page]);
 
 		$list = new IdpPaginatedList(
 			self::processResponse($response),
@@ -385,7 +318,6 @@ class IdpClient
 	 * @param string $userId
 	 * @return IdpUser
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function getUser(string $userId): IdpUser
 	{
@@ -394,16 +326,9 @@ class IdpClient
 			return self::$users[$userId];
 		}
 
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->get("api/v1/user/{$userId}");
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->get("api/v1/user/{$userId}");
 
 		$user = new IdpUser(self::processResponse($response));
 
@@ -416,22 +341,14 @@ class IdpClient
 	 * @description Disassociate the specified user from the current organization
 	 * @param string $userId
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function deleteUser(string $userId): void
 	{
 		$serverToken = self::getServerToken();
 
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->delete("api/v1/user/{$userId}");
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->delete("api/v1/user/{$userId}");
 
 		self::processResponse($response);
 	}
@@ -441,20 +358,12 @@ class IdpClient
 	 * @param string $userId
 	 * @return IdpUser
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function associateUser(string $userId): IdpUser
 	{
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->patch("api/v1/user/{$userId}/organization");
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->patch("api/v1/user/{$userId}/organization");
 
 		$user = new IdpUser(self::processResponse($response));
 
@@ -468,25 +377,17 @@ class IdpClient
 	 * @param string $userToken
 	 * @return IdpUser
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function associateUserToken(string $userToken): IdpUser
 	{
 		self::validateUserToken($userToken);
 
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->asJson()
-				->post('api/v1/user/organization/token', [
-					'access_token' => $userToken
-				]);
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->asJson()
+            ->post('api/v1/user/organization/token', [
+                'access_token' => $userToken
+            ]);
 
 		$user = new IdpUser(self::processResponse($response));
 
@@ -500,20 +401,12 @@ class IdpClient
 	 * for testing authenticated endpoints
 	 * @param string $userId
 	 * @return IdpAccessToken
-	 * @throws IdpRemoteException
 	 */
 	public static function getDevUserToken(string $userId): IdpAccessToken
 	{
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->get("api/v1/user/$userId/token");
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->get("api/v1/user/$userId/token");
 
 		return new IdpAccessToken(self::processResponse($response));
 	}
@@ -523,23 +416,15 @@ class IdpClient
 	 * @param string $userToken
 	 * @return IdpUser
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function validateUserToken(string $userToken): IdpUser
 	{
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->asJson()
-				->post('api/v1/user/token', [
-					'access_token' => $userToken
-				]);
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->asJson()
+            ->post('api/v1/user/token', [
+                'access_token' => $userToken
+            ]);
 
 		$user = new IdpUser(self::processResponse($response));
 
@@ -554,24 +439,16 @@ class IdpClient
 	 * @param string $userToken Current admin user's token
 	 * @return IdpAccessToken
 	 * @throws IdpException
-	 * @throws IdpRemoteException
 	 */
 	public static function impersonateUser(string $userId,
 		string $userToken): IdpAccessToken
 	{
-		try
-		{
-			$response = self::getHttp()
-				->withToken(self::getServerToken()->access_token)
-				->asJson()
-				->post("api/v1/user/{$userId}/impersonate", [
-					'requesting_access_token' => $userToken
-				]);
-		}
-		catch (\Exception $e)
-		{
-			throw new IdpRemoteException($e);
-		}
+        $response = self::getHttp()
+            ->withToken(self::getServerToken()->access_token)
+            ->asJson()
+            ->post("api/v1/user/{$userId}/impersonate", [
+                'requesting_access_token' => $userToken
+            ]);
 
 		return new IdpAccessToken(self::processResponse($response));
 	}

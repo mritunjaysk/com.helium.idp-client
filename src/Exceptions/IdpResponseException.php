@@ -21,9 +21,9 @@ class IdpResponseException extends IdpException
 		$this->httpStatusCode = $httpStatusCode;
 		$this->messages = $messages;
 
-		$exceptionMessage = "IDP Request Failed. See ";
-		$exceptionMessage .= "IdpResponseException::toArray ";
-		$exceptionMessage .= "for more information.";
+		$exceptionMessage = "Request to IDP Server failed with status code $httpStatusCode." . PHP_EOL;
+		$exceptionMessage .= "Messages from server:" . PHP_EOL;
+		$exceptionMessage .= print_r($messages, true);
 
 		parent::__construct($exceptionMessage);
 	}

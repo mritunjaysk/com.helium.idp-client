@@ -2,7 +2,6 @@
 
 namespace Helium\IdpClient\Tests;
 
-use Helium\IdpClient\Exceptions\IdpRemoteException;
 use Helium\IdpClient\Exceptions\IdpResponseException;
 use Helium\IdpClient\IdpClient;
 use Helium\IdpClient\Models\IdpOrganization;
@@ -10,8 +9,6 @@ use Helium\IdpClient\Models\IdpPaginatedList;
 use Helium\IdpClient\Models\IdpAccessToken;
 use Helium\IdpClient\Models\IdpUser;
 use Exception;
-use GuzzleHttp\Psr7\Response as GuzzleResponse;
-use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Request;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -59,23 +56,6 @@ class IdpClientTest extends TestCase
 		catch (Exception $e)
 		{
 			$this->assertInstanceOf(IdpResponseException::class, $e);
-		}
-	}
-
-	public function testGetServerTokenException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			IdpClient::getServerToken();
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
 		}
 	}
 
@@ -135,24 +115,6 @@ class IdpClientTest extends TestCase
 		}
 	}
 
-	public function testCreateOrganizationException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$organization = new IdpOrganization();
-			$response = IdpClient::createOrganization($organization);
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
-		}
-	}
-
 	public function testListOrganizations()
 	{
 		$this->fakeSuccessfulRequest([
@@ -196,23 +158,6 @@ class IdpClientTest extends TestCase
 		}
 	}
 
-	public function testListOrganizationsException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$response = IdpClient::listOrganizations();
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
-		}
-	}
-
 	public function testGetOrganization()
 	{
 		$this->fakeSuccessfulRequest();
@@ -246,23 +191,6 @@ class IdpClientTest extends TestCase
 		}
 	}
 
-	public function testGetOrganizationException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$response = IdpClient::getOrganization('ORG-1234567890');
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
-		}
-	}
-
 	public function testGetMyOrganization()
 	{
 		$this->fakeSuccessfulRequest();
@@ -293,23 +221,6 @@ class IdpClientTest extends TestCase
 		catch (Exception $e)
 		{
 			$this->assertInstanceOf(IdpResponseException::class, $e);
-		}
-	}
-
-	public function testGetMyOrganizationException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$response = IdpClient::getMyOrganization();
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
 		}
 	}
 
@@ -352,24 +263,6 @@ class IdpClientTest extends TestCase
 		}
 	}
 
-	public function testUpdateOrganizationException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$organization = new IdpOrganization();
-			$response = IdpClient::updateOrganization('ORG-123', $organization);
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
-		}
-	}
-
 	public function testRegisterUser()
 	{
 		$this->fakeSuccessfulRequest();
@@ -402,24 +295,6 @@ class IdpClientTest extends TestCase
 		catch (Exception $e)
 		{
 			$this->assertInstanceOf(IdpResponseException::class, $e);
-		}
-	}
-
-	public function testRegisterUserException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$user = new IdpUser();
-			$response = IdpClient::registerUser($user);
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
 		}
 	}
 
@@ -466,23 +341,6 @@ class IdpClientTest extends TestCase
 		}
 	}
 
-	public function testListUsersException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$response = IdpClient::listUsers();
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
-		}
-	}
-
 	public function testGetUser()
 	{
 		$this->fakeSuccessfulRequest();
@@ -513,23 +371,6 @@ class IdpClientTest extends TestCase
 		catch (Exception $e)
 		{
 			$this->assertInstanceOf(IdpResponseException::class, $e);
-		}
-	}
-
-	public function testGetUserException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$response = IdpClient::getUser('USR-1234567890');
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
 		}
 	}
 
@@ -570,23 +411,6 @@ class IdpClientTest extends TestCase
 		}
 	}
 
-	public function testDeleteUserException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$response = IdpClient::deleteUser('USR-123');
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
-		}
-	}
-
 	public function testAssociateUser()
 	{
 		$this->fakeSuccessfulRequest();
@@ -621,23 +445,6 @@ class IdpClientTest extends TestCase
 		catch (Exception $e)
 		{
 			$this->assertInstanceOf(IdpResponseException::class, $e);
-		}
-	}
-
-	public function testAssociateUserException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$response = IdpClient::associateUser('USR-123');
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
 		}
 	}
 
@@ -680,24 +487,6 @@ class IdpClientTest extends TestCase
 		}
 	}
 
-	public function testAssociateUserTokenException()
-	{
-		$this->fakeSuccessfulRequest(); //Fake validateUserToken
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$response = IdpClient::associateUserToken('abc123');
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
-		}
-	}
-
 	public function testGetDevUserToken()
 	{
 		$this->fakeSuccessfulRequest();
@@ -735,23 +524,6 @@ class IdpClientTest extends TestCase
 		}
 	}
 
-	public function testGetDevUserTokenException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$response = IdpClient::getDevUserToken('USR-123');
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
-		}
-	}
-
 	public function testValidateUserToken()
 	{
 		$this->fakeSuccessfulRequest();
@@ -786,23 +558,6 @@ class IdpClientTest extends TestCase
 		catch (Exception $e)
 		{
 			$this->assertInstanceOf(IdpResponseException::class, $e);
-		}
-	}
-
-	public function testValidateUserTokenException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$response = IdpClient::validateUserToken('abc123');
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
 		}
 	}
 
@@ -844,23 +599,6 @@ class IdpClientTest extends TestCase
 		catch (Exception $e)
 		{
 			$this->assertInstanceOf(IdpResponseException::class, $e);
-		}
-	}
-
-	public function testImpersonateUserException()
-	{
-		//By not pushing a new response to the HTTP fake response sequence, an
-		//exception will be thrown
-
-		try
-		{
-			$response = IdpClient::impersonateUser('USR-123', 'abc123');
-
-			$this->assertTrue(false);
-		}
-		catch (Exception $e)
-		{
-			$this->assertInstanceOf(IdpRemoteException::class, $e);
 		}
 	}
 	//endregion
