@@ -28,6 +28,8 @@ class IdpUser extends OfflineModel
 		'created_at',
 		'updated_at',
 		'username',
+		'firstname',
+		'lastname',
 		'password',
 		'password_confirmation',
 		'pin',
