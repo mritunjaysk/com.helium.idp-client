@@ -37,6 +37,7 @@ class IdpUser extends OfflineModel
 		'phone',
 		'language',
 		'country',
-		'organizations'
+		'organizations',
+		'last_login_time'
 	];
 }
