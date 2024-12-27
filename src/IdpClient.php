@@ -417,14 +417,15 @@ class IdpClient
 	 * @return IdpUser
 	 * @throws IdpException
 	 */
-	public static function validateUserToken(string $userToken): IdpUser
+	public static function validateUserToken(string $userToken, string $accessToken = ''): IdpUser
 	{
-        $response = self::getHttp()
-            ->withToken(self::getServerToken()->access_token)
-            ->asJson()
-            ->post('api/v1/user/token', [
-                'access_token' => $userToken
-            ]);
+		$accessToken = empty($accessToken) ? self::getServerToken()->access_token : $accessToken;
+		$response = self::getHttp()
+	            ->withToken($accessToken)
+	            ->asJson()
+	            ->post('api/v1/user/token', [
+	                'access_token' => $userToken
+	            ]);
 
 		$user = new IdpUser(self::processResponse($response));
 
